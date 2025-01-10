@@ -18,10 +18,15 @@ import {
 import { FcGoogle } from "react-icons/fc";
 import { useGoogleLogin } from "@react-oauth/google";
 import axios from "axios";
+import { doc, setDoc } from "firebase/firestore";
+import { db } from "@/services/FireBaseConfig";
+import { AiOutlineLoading3Quarters } from "react-icons/ai";
 function CreateTrip() {
   const [place, setPlace] = React.useState();
   const [formData, setFormData] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
+  const [loading, setLoading] = useState(false);
+
   const handleInputChange = (name, value) => {
     setFormData({
       ...formData,
@@ -43,12 +48,12 @@ function CreateTrip() {
       !formData?.traveler
     ) {
       toast("Please fill all the fields");
-      console.log("You can't travel more than 5 days");
       return;
     }
+    setLoading(true);
     const FINAL_PROMPT = AI_PROMPT.replace(
       "{location}",
-      formData?.location.label
+      formData?.location?.label
     )
       .replace("{noOfDays}", formData?.noOfDays)
       .replace("{traveler}", formData?.traveler)
@@ -59,6 +64,8 @@ function CreateTrip() {
 
     const result = await chatSession.sendMessage(FINAL_PROMPT);
     console.log(result?.response?.text());
+    setLoading(false);
+    saveTripData(result?.response?.text());
   };
 
   const getUserProfile = (token) => {
@@ -89,6 +96,21 @@ function CreateTrip() {
       console.log("Login Error:", error);
     },
   });
+
+  const saveTripData = async (tripData) => {
+    // Add a new document in collection "tripPlanner"
+    setLoading(true);
+    const docId = Date.now().toString();
+    const user = JSON.parse(localStorage.getItem("user"));
+    await setDoc(doc(db, "tripPlanner", docId), {
+      userSelection: formData,
+      tripData: JSON.parse(tripData),
+      userEmail: user?.email,
+      docId: docId,
+    });
+    setLoading(false);
+  };
+
   return (
     <div className="flex flex-col items-center justify-center sm:px-10 md:px-32 lg:px-56 xl:px-10 px-5 mt-10">
       <h2 className="font-bold text-4xl">
@@ -174,7 +196,13 @@ function CreateTrip() {
           </div>
         </div>
         <div className="my-4 justify-end flex">
-          <Button onClick={onGenerateTrip}>Generate Trip</Button>
+          <Button disabled={loading} onClick={onGenerateTrip}>
+            {loading ? (
+              <AiOutlineLoading3Quarters className="h-7 w-7 animate-spin" />
+            ) : (
+              "Generate Trip"
+            )}
+          </Button>
         </div>
       </div>
       <Dialog open={openDialog}>
@@ -185,11 +213,14 @@ function CreateTrip() {
               <h2 className="font-bold text-lg mt-7">Sign In With Google</h2>
               <p>Authenticate with Google Securely</p>
               <Button
+                disabled={loading}
                 onClick={login}
                 className="mt-5 w-full gap-4 items-center"
               >
-                <FcGoogle className="h-7 w-7" />
-                Sign In With Google
+                <>
+                  <FcGoogle className="h-7 w-7" />
+                  Sign In With Google
+                </>
               </Button>
             </DialogDescription>
           </DialogHeader>
