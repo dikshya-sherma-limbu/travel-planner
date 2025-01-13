@@ -60,6 +60,15 @@ export default function Header() {
       <div className="">
         {user ? (
           <div className="flex items-center space-x-2">
+            <a href="/create-trip">
+              <Button
+                variant="outline"
+                className="rounded-full bg-black text-white"
+              >
+                + Plan a Trip
+              </Button>
+            </a>
+
             <a href="/my-trips">
               <Button
                 variant="outline"

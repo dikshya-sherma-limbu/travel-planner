@@ -1,6 +1,7 @@
 import React from "react";
 import { Button } from "../ui/button";
 import { Link } from "react-router-dom";
+import image from "../../assets/trip.jpg";
 
 export default function Hero() {
   return (
@@ -18,6 +19,11 @@ export default function Hero() {
       <Link to="/create-trip">
         <Button>Explore</Button>
       </Link>
+      <img
+        src={image}
+        alt="travel"
+        className="w-[300px] h-[500px] object-cover shadow-md rounded-xl sm:w-[500px] sm:h-[150px] md:w-[1000px] md:h-[250px]"
+      />
     </div>
   );
 }
