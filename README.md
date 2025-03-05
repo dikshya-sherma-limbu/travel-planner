@@ -17,7 +17,7 @@ Responsive UI with Tailwind CSS
 
 Fast performance using Vite
 
-$$ Tech Stack
+## Tech Stack
 
 Frontend: React, Vite, Tailwind CSS
 
